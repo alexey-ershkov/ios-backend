@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	uuid "github.com/nu7hatch/gouuid"
-	"ios-backend/configs"
+	"ios-backend/src/configs"
 )
 
 func SaveFile(file multipart.File, header *multipart.FileHeader, folder string) (string, error) {

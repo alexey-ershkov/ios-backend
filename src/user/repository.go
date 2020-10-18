@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 
-	"ios-backend/user/models"
+	"ios-backend/src/user/models"
 )
 
 type Repository interface {
