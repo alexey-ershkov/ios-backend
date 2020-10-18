@@ -2,13 +2,51 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
+
+	"github.com/gorilla/mux"
+	"github.com/jmoiron/sqlx"
+	"github.com/rs/zerolog/log"
+	"ios-backend/configs"
+	"ios-backend/user/delivery"
+	"ios-backend/user/repository"
+	"ios-backend/user/usecase"
 )
 
 func main() {
-	PORT := ":3000"
+	r := mux.NewRouter()
 
-	fmt.Println("Server started on port ", PORT)
-	log.Fatal(http.ListenAndServe(PORT, nil))
+	timeoutContext := configs.Timeouts.ContextTimeout
+
+	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable port=%s host=%s",
+		configs.PostgresPreferences.User,
+		configs.PostgresPreferences.Password,
+		configs.PostgresPreferences.DBName,
+		configs.PostgresPreferences.Port,
+		configs.PostgresPreferences.Host)
+
+	conn, err := sqlx.Open("postgres", connStr)
+	if err != nil {
+		log.Error().Msgf(err.Error())
+		return
+	}
+
+	rep := repository.NewPostgresUserRepository(conn)
+	ucase := usecase.NewUserUsecase(rep, timeoutContext)
+	delivery.NewUserHandler(r, ucase)
+
+	//static server
+	r.PathPrefix(fmt.Sprintf("/%s/", configs.MEDIA_FOLDER)).Handler(
+		http.StripPrefix(fmt.Sprintf("/%s/", configs.MEDIA_FOLDER),
+			http.FileServer(http.Dir(configs.MEDIA_FOLDER))))
+
+	http.Handle("/", r)
+	srv := &http.Server{
+		Handler:      r,
+		Addr:         configs.SERVER_ADDRESS,
+		WriteTimeout: configs.Timeouts.WriteTimeout,
+		ReadTimeout:  configs.Timeouts.ReadTimeout,
+	}
+	fmt.Println("main server started at ", configs.SERVER_URL)
+	log.Error().Msgf(srv.ListenAndServe().Error())
 }
