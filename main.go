@@ -7,10 +7,10 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
 	"github.com/rs/zerolog/log"
-	"ios-backend/configs"
-	"ios-backend/user/delivery"
-	"ios-backend/user/repository"
-	"ios-backend/user/usecase"
+	"ios-backend/src/configs"
+	"ios-backend/src/user/delivery"
+	"ios-backend/src/user/repository"
+	"ios-backend/src/user/usecase"
 )
 
 func main() {
