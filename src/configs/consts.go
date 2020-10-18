@@ -31,18 +31,18 @@ type postgresPreferencesStruct struct {
 	DBName   string
 }
 
-//var PostgresPreferences = postgresPreferencesStruct{
-//	User:     "docker",
-//	Password: "docker",
-//	Port:     "5432",
-//	Host:     "127.0.0.1",
-//	DBName:   "docker",
-//}
-
 var PostgresPreferences = postgresPreferencesStruct{
-	User:     "postgres",
-	Password: "",
+	User:     "docker",
+	Password: "docker",
 	Port:     "5432",
 	Host:     "127.0.0.1",
-	DBName:   "postgres",
+	DBName:   "docker",
 }
+
+//var PostgresPreferences = postgresPreferencesStruct{
+//	User:     "postgres",
+//	Password: "",
+//	Port:     "5432",
+//	Host:     "127.0.0.1",
+//	DBName:   "postgres",
+//}
