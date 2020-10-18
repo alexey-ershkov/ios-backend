@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"ios-backend/configs"
-	"ios-backend/user"
-	"ios-backend/user/models"
-	"ios-backend/utills"
+	"ios-backend/src/configs"
+	"ios-backend/src/user"
+	"ios-backend/src/user/models"
+	"ios-backend/src/utills"
 )
 
 type UserHandler struct {
