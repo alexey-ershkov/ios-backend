@@ -6,9 +6,9 @@ import (
 
 const (
 	SERVER_PORT    = ":5000"
-	SERVER_URL     = "http://127.0.0.1:5000"
+	SERVER_URL     = "http://0.0.0.0:5000"
 	MEDIA_FOLDER   = "media"
-	SERVER_ADDRESS = "127.0.0.1:5000"
+	SERVER_ADDRESS = "0.0.0.0:5000"
 )
 
 type timeouts struct {
@@ -32,11 +32,11 @@ type postgresPreferencesStruct struct {
 }
 
 var PostgresPreferences = postgresPreferencesStruct{
-	User:     "docker",
-	Password: "docker",
+	User:     "postgres",
+	Password: "postgres",
 	Port:     "5432",
-	Host:     "127.0.0.1",
-	DBName:   "docker",
+	Host:     "0.0.0.0",
+	DBName:   "postgres",
 }
 
 //var PostgresPreferences = postgresPreferencesStruct{
