@@ -19,6 +19,7 @@ createdb -O docker docker &&\
 psql -f /opt/db.sql -d docker &&\
 /etc/init.d/postgresql stop
 ENV POSTGRES_DSN=postgres://docker:docker@localhost/docker
+ENV IN_DOCKER=true
 
 
 RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/$PGVER/main/pg_hba.conf
