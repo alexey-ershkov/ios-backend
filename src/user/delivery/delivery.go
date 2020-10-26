@@ -22,8 +22,8 @@ func NewUserHandler(r *mux.Router, us user.Usecase) {
 	handler := UserHandler{
 		SUsecase: us,
 	}
-	r.HandleFunc("/api/add", handler.AddUser).Methods(http.MethodPost)
-
+	r.HandleFunc("/user/add", handler.AddUser).Methods(http.MethodPost)
+	r.HandleFunc("/user/get", handler.GetUser).Methods(http.MethodGet)
 }
 
 func (s *UserHandler) fetchUser(r *http.Request) (models.User, error) {
@@ -74,6 +74,25 @@ func (u UserHandler) AddUser(writer http.ResponseWriter, request *http.Request) 
 		HttpOnly:   true,
 	}
 	http.SetCookie(writer, endlessCookie)
-
+	newUser.UserID = 0 // for security
 	utills.SendOKAnswer(newUser, writer)
+}
+
+func (s *UserHandler) GetUser(writer http.ResponseWriter, request *http.Request) {
+	userIdCookie, err := request.Cookie("user_id")
+	if err != nil {
+		utills.SendServerError(configs.ErrUserIsNotRegistered.Error(), http.StatusUnauthorized, writer)
+		return
+	}
+	userId, err := strconv.Atoi(userIdCookie.Value)
+	if err != nil {
+		utills.SendServerError(configs.ErrUserIdIsNotNumber.Error(), http.StatusUnauthorized, writer)
+		return
+	}
+	usr, err := s.SUsecase.GetCurrent(request.Context(), userId)
+	if err != nil {
+		utills.SendServerError(err.Error(), http.StatusUnauthorized, writer)
+		return
+	}
+	utills.SendOKAnswer(usr, writer)
 }

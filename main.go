@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
@@ -14,16 +15,22 @@ import (
 )
 
 func main() {
-	r := mux.NewRouter()
-
+	r := mux.NewRouter().PathPrefix(configs.API_PREFIX).Subrouter()
 	timeoutContext := configs.Timeouts.ContextTimeout
 
-	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable port=%s host=%s",
-		configs.PostgresPreferences.User,
-		configs.PostgresPreferences.Password,
-		configs.PostgresPreferences.DBName,
-		configs.PostgresPreferences.Port,
-		configs.PostgresPreferences.Host)
+	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable port=%s",
+		"postgres", //docker,postgres
+		"",         //docker, empty
+		"postgres", //docker,postgres
+		"5432")     // для тестов на локалке
+
+	if os.Getenv("IN_DOCKER") == "true" {
+		connStr = fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable port=%s",
+			"docker", //docker,postgres
+			"docker", //docker, empty
+			"docker", //docker,postgres
+			"5432")
+	}
 
 	conn, err := sqlx.Open("postgres", connStr)
 	if err != nil {
