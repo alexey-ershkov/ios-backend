@@ -5,10 +5,10 @@ import (
 )
 
 const (
-	SERVER_PORT    = ":5000"
 	SERVER_URL     = "http://0.0.0.0:5000"
 	MEDIA_FOLDER   = "media"
 	SERVER_ADDRESS = "0.0.0.0:5000"
+	API_PREFIX     = "/api"
 )
 
 type timeouts struct {

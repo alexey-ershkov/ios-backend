@@ -24,12 +24,19 @@ func (p PostgresUserRepository) Add(c context.Context, newUser models.User) (mod
                   password,
                   photo) 
                   VALUES ($1,$2,$3,$4) 
-                  RETURNING UserID, NickName, Email,Photo`
+                  RETURNING UserID,NickName, Email,Photo`
 
 	err := p.conn.GetContext(c, &dbUser, query, newUser.NickName, newUser.Email, newUser.Password, newUser.Photo)
 	return dbUser, err
 }
 
 func (p PostgresUserRepository) GetByID(c context.Context, id int) (models.SafeUser, error) {
-	panic("implement me")
+	var dbUser models.User
+	query := `SELECT * from users where UserID=$1`
+	err := p.conn.GetContext(c, &dbUser, query, id)
+	return models.SafeUser{
+		NickName: dbUser.NickName,
+		Email:    dbUser.Email,
+		Photo:    dbUser.Photo,
+	}, err
 }

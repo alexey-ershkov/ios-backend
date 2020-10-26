@@ -14,15 +14,21 @@ import (
 )
 
 func main() {
-	r := mux.NewRouter()
+	r := mux.NewRouter().PathPrefix(configs.API_PREFIX).Subrouter()
 
 	timeoutContext := configs.Timeouts.ContextTimeout
 
+	//connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable port=%s",
+	//	"docker", //docker,postgres
+	//	"docker", //docker, empty
+	//	"docker", //docker,postgres
+	//	"5432")
+
 	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable port=%s",
-		"docker", //docker,postgres
-		"docker", //docker, empty
-		"docker", //docker,postgres
-		"5432")
+		"postgres", //docker,postgres
+		"",         //docker, empty
+		"postgres", //docker,postgres
+		"5432")     // для тестов на локалке
 	conn, err := sqlx.Open("postgres", connStr)
 	if err != nil {
 		log.Error().Msgf(err.Error())

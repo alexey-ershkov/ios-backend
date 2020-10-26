@@ -30,7 +30,7 @@ func (u UserUsecase) Add(c context.Context, newUser models.User) (models.SafeUse
 
 	usr, err := u.userRepo.Add(ctx, newUser)
 	if err != nil {
-		return usr, configs.ErrUserAlreadyExist
+		return models.SafeUser{}, configs.ErrUserAlreadyExist
 	}
 	return usr, err
 }
@@ -38,5 +38,9 @@ func (u UserUsecase) Add(c context.Context, newUser models.User) (models.SafeUse
 func (u UserUsecase) GetCurrent(c context.Context, id int) (models.SafeUser, error) {
 	ctx, cancel := context.WithTimeout(c, u.contextTimeout)
 	defer cancel()
-	return u.userRepo.GetByID(ctx, id)
+	usr, err := u.userRepo.GetByID(ctx, id)
+	if err != nil {
+		return models.SafeUser{}, configs.ErrUserIsNotRegistered
+	}
+	return usr, err
 }
