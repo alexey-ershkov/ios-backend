@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	r := mux.NewRouter().PathPrefix(configs.API_PREFIX).Subrouter()
+	r := mux.NewRouter()
 	timeoutContext := configs.Timeouts.ContextTimeout
 
 	connStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable port=%s",
