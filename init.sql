@@ -28,3 +28,6 @@ create table crypto_cost_in_usd
 );
 
 insert into currency_info (name, stock_name, description) values ('Bitcoin', 'BTC', 'Bitcoin desc');
+insert into currency_info (name, stock_name, description) VALUES ('Ethereum', 'ETH', 'Ethereum desc');
+insert into currency_info (name, stock_name, description) VALUES ('Waves', 'WVS', 'Waves desc');
+

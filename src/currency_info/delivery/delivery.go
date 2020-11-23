@@ -31,6 +31,7 @@ func (u UserHandler) GetCurrency (w http.ResponseWriter, r *http.Request) {
 		utills.SendServerError(err.Error(), 500, w)
 		return
 	}
+
 	w.Header().Set("Content-Type", "application/json")
 	utills.SendOKAnswer(currInfo, w)
 }

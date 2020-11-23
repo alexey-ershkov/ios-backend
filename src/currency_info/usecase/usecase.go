@@ -24,7 +24,14 @@ func (uc CurrUsecase) GetCurrencyByName(name string) (*models.Currency, error) {
 	curr.StockName = info.StockName
 	curr.Description = info.Description
 	curr.ChangeValueInPercents = 3.61
-	curr.Cost = 23.4
+	switch info.CurrencyName {
+	case "Bitcoin":
+		curr.Cost = 18583
+	case "Ethereum":
+		curr.Cost = 582.63
+	case "Waves":
+		curr.Cost = 8.16
+	}
 	curr.DidGrow = true
 	curr.ConvertionCurrencyName = "USD"
 	return curr, nil
