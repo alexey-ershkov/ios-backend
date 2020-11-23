@@ -1,7 +1,6 @@
 package delivery
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -32,15 +31,10 @@ func (s *UserHandler) fetchUser(r *http.Request) (models.User, error) {
 		return models.User{}, configs.ErrBadRequest
 	}
 
-	jsonData := r.FormValue("jsonData")
-	if jsonData == "" || jsonData == "null" {
-		return models.User{}, configs.ErrEmptyJSON
-	}
-
-	var UserObj models.User
-	err = json.Unmarshal([]byte(jsonData), &UserObj)
-	if err != nil {
-		return models.User{}, configs.ErrBadJSON
+	UserObj := models.User{
+		NickName: r.FormValue("Nickname"),
+		Email:    r.FormValue("Email"),
+		Password: r.FormValue("Password"),
 	}
 	if file, handler, err := r.FormFile("photo"); err == nil {
 		filename, err := utills.SaveFile(file, handler, "Users")
