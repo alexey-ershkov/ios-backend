@@ -12,6 +12,10 @@ import (
 	"ios-backend/src/user/delivery"
 	"ios-backend/src/user/repository"
 	"ios-backend/src/user/usecase"
+
+	currDelivery "ios-backend/src/currency_info/delivery"
+	currRepo "ios-backend/src/currency_info/repository"
+	currUCase "ios-backend/src/currency_info/usecase"
 )
 
 func main() {
@@ -22,7 +26,7 @@ func main() {
 		"postgres", //docker,postgres
 		"",         //docker, empty
 		"postgres", //docker,postgres
-		"5432")     // для тестов на локалке
+		"5432") // для тестов на локалке
 
 	if os.Getenv("IN_DOCKER") == "true" {
 		connStr = fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable port=%s",
@@ -41,6 +45,10 @@ func main() {
 	rep := repository.NewPostgresUserRepository(conn)
 	ucase := usecase.NewUserUsecase(rep, timeoutContext)
 	delivery.NewUserHandler(r, ucase)
+
+	currR := currRepo.NewCurrRepo(conn)
+	currUC := currUCase.NewCurrUsecase(currR)
+	currDelivery.NewUserHandler(r, currUC)
 
 	//static server
 	r.PathPrefix(fmt.Sprintf("/%s/", configs.MEDIA_FOLDER)).Handler(
