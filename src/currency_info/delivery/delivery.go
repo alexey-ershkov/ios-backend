@@ -15,10 +15,10 @@ func NewUserHandler(r *mux.Router, UC currency_info.CurrUCase) {
 	handler := UserHandler{
 		UC: UC,
 	}
-	r.HandleFunc("/currency/get", handler.GetCurrency).Methods(http.MethodGet)
+	r.HandleFunc("/api/currency/get", handler.GetCurrency).Methods(http.MethodGet)
 }
 
-func (u UserHandler) GetCurrency (w http.ResponseWriter, r *http.Request) {
+func (u UserHandler) GetCurrency(w http.ResponseWriter, r *http.Request) {
 	args, ok := r.URL.Query()["curr_name"]
 	if !ok || len(args) < 1 {
 		utills.SendServerError("No param in query", 404, w)

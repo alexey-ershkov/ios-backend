@@ -16,7 +16,7 @@ create table if not exists currency_info
     description citext collate "C" not null
 );
 
-create table crypto_cost_in_usd
+create table if not exists crypto_cost_in_usd
 (
     id           bigserial primary key,
     curr_info_fk bigint                    not null
