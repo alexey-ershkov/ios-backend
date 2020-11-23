@@ -22,8 +22,8 @@ func NewUserHandler(r *mux.Router, us user.Usecase) {
 	handler := UserHandler{
 		SUsecase: us,
 	}
-	r.HandleFunc("/user/add", handler.AddUser).Methods(http.MethodPost)
-	r.HandleFunc("/user/get", handler.GetUser).Methods(http.MethodGet)
+	r.HandleFunc("/api/user/add", handler.AddUser).Methods(http.MethodPost)
+	r.HandleFunc("/api/user/get", handler.GetUser).Methods(http.MethodGet)
 }
 
 func (s *UserHandler) fetchUser(r *http.Request) (models.User, error) {
