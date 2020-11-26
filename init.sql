@@ -10,10 +10,9 @@ CREATE TABLE If Not Exists users
 
 create table if not exists currency_info
 (
-    id          bigserial primary key,
+    cmc_id int primary key ,
     name        citext collate "C" not null,
     symbol  citext collate "C" not null,
-    cmc_id int not null ,
     rank int not null ,
     logo citext collate "C" not null,
     date_added citext collate "C" not null,
