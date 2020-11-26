@@ -7,18 +7,20 @@ import (
 	"net/http"
 )
 
-type UserHandler struct {
-	UC currency_info.CurrUCase
+type CurrencyHandler struct {
+	UC     currency_info.CurrUCase
+	ApiKey string
+	ApiURL string
 }
 
 func NewUserHandler(r *mux.Router, UC currency_info.CurrUCase) {
-	handler := UserHandler{
+	handler := CurrencyHandler{
 		UC: UC,
 	}
 	r.HandleFunc("/api/currency/get", handler.GetCurrency).Methods(http.MethodGet)
 }
 
-func (u UserHandler) GetCurrency(w http.ResponseWriter, r *http.Request) {
+func (ch CurrencyHandler) GetCurrency(w http.ResponseWriter, r *http.Request) {
 	args, ok := r.URL.Query()["curr_name"]
 	if !ok || len(args) < 1 {
 		utills.SendServerError("No param in query", 404, w)
@@ -26,7 +28,7 @@ func (u UserHandler) GetCurrency(w http.ResponseWriter, r *http.Request) {
 	}
 	name := args[0]
 
-	currInfo, err := u.UC.GetCurrencyByName(name)
+	currInfo, err := ch.UC.GetCurrencyByName(name)
 	if err != nil {
 		utills.SendServerError(err.Error(), 500, w)
 		return

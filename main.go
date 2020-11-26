@@ -1,7 +1,10 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"github.com/joho/godotenv"
+	v1 "ios-backend/src/CoinBaseApiRequests/v1"
 	"net/http"
 	"os"
 
@@ -17,6 +20,12 @@ import (
 	currRepo "ios-backend/src/currency_info/repository"
 	currUCase "ios-backend/src/currency_info/usecase"
 )
+
+func init() {
+	if err := godotenv.Load(); err != nil {
+		log.Print("No .env file found")
+	}
+}
 
 func main() {
 	r := mux.NewRouter()
@@ -40,6 +49,15 @@ func main() {
 	if err != nil {
 		log.Error().Msgf(err.Error())
 		return
+	}
+
+	init := flag.Bool("metadata_init", false, "Insert 200 cryptocurrencies metadata info")
+	flag.Parse()
+	if *init {
+		err = v1.GetCurrencyMetadata(conn)
+		if err != nil {
+			log.Error().Msgf(err.Error())
+		}
 	}
 
 	rep := repository.NewPostgresUserRepository(conn)
