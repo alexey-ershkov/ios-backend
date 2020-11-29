@@ -2,11 +2,15 @@ package main
 
 import (
 	"fmt"
+	"github.com/joho/godotenv"
+	v1 "ios-backend/src/CoinBaseApiRequests/v1"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"github.com/rs/zerolog/log"
 	"ios-backend/src/configs"
 	"ios-backend/src/user/delivery"
@@ -17,6 +21,26 @@ import (
 	currRepo "ios-backend/src/currency_info/repository"
 	currUCase "ios-backend/src/currency_info/usecase"
 )
+
+func updateCurr (conn *sqlx.DB) {
+	err := v1.UpdateCryptoInfo(conn)
+	if err != nil {
+		log.Error().Msgf(err.Error())
+	}
+}
+
+func updateCurrEvery(d time.Duration, conn *sqlx.DB) {
+	for range time.Tick(d) {
+		updateCurr(conn)
+	}
+}
+
+
+func init() {
+	if err := godotenv.Load(); err != nil {
+		log.Print("No .env file found")
+	}
+}
 
 func main() {
 	r := mux.NewRouter()
@@ -42,6 +66,7 @@ func main() {
 		return
 	}
 
+
 	rep := repository.NewPostgresUserRepository(conn)
 	ucase := usecase.NewUserUsecase(rep, timeoutContext)
 	delivery.NewUserHandler(r, ucase)
@@ -49,6 +74,9 @@ func main() {
 	currR := currRepo.NewCurrRepo(conn)
 	currUC := currUCase.NewCurrUsecase(currR)
 	currDelivery.NewUserHandler(r, currUC)
+
+	updateCurr(conn)
+	go updateCurrEvery(configs.UPD_INTERVAL, conn)
 
 	//static server
 	r.PathPrefix(fmt.Sprintf("/%s/", configs.MEDIA_FOLDER)).Handler(

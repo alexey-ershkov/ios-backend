@@ -9,6 +9,7 @@ const (
 	MEDIA_FOLDER   = "media"
 	SERVER_ADDRESS = "0.0.0.0:5000"
 	API_PREFIX     = "/api"
+	UPD_INTERVAL = time.Hour
 )
 
 type timeouts struct {
