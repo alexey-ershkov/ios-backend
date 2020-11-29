@@ -6,6 +6,7 @@ import (
 	v1 "ios-backend/src/CoinBaseApiRequests/v1"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
@@ -20,6 +21,20 @@ import (
 	currRepo "ios-backend/src/currency_info/repository"
 	currUCase "ios-backend/src/currency_info/usecase"
 )
+
+func updateCurr (conn *sqlx.DB) {
+	err := v1.UpdateCryptoInfo(conn)
+	if err != nil {
+		log.Error().Msgf(err.Error())
+	}
+}
+
+func updateCurrEvery(d time.Duration, conn *sqlx.DB) {
+	for range time.Tick(d) {
+		updateCurr(conn)
+	}
+}
+
 
 func init() {
 	if err := godotenv.Load(); err != nil {
@@ -60,10 +75,8 @@ func main() {
 	currUC := currUCase.NewCurrUsecase(currR)
 	currDelivery.NewUserHandler(r, currUC)
 
-	err = v1.UpdateCryptoInfo(conn)
-	if err != nil {
-		log.Error().Msgf(err.Error())
-	}
+	updateCurr(conn)
+	go updateCurrEvery(configs.UPD_INTERVAL, conn)
 
 	//static server
 	r.PathPrefix(fmt.Sprintf("/%s/", configs.MEDIA_FOLDER)).Handler(
