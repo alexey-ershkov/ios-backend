@@ -2,7 +2,7 @@
 ## Backend for IOS course in BMSTU Techpark
 ### Go, postgres, docker, Clean Architecture
 
-Для запуска с заполеннием базы нужно создать файл .env  в cmd со следующими переменными:
+Для запуска с заполеннием базы нужно создать файл .env  в корневой директории со следующими переменными:
 ```
 COINMARKET_API_KEY=<ключ для CoinMarkert>
 COINMARKET_URL=https://pro-api.coinmarketcap.com
