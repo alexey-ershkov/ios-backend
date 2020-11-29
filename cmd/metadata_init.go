@@ -38,10 +38,10 @@ func main() {
 	}
 
 
-	//err = cmc.GetCurrencyMetadata(conn)
-	//if err != nil {
-	//	log.Error().Msgf(err.Error())
-	//}
+	err = cmc.GetCurrencyMetadata(conn)
+	if err != nil {
+		log.Error().Msgf(err.Error())
+	}
 
 	err = cmc.GetFiatMetadata(conn)
 	if err != nil {
