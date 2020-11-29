@@ -5,7 +5,7 @@ import (
 	"ios-backend/src/CoinBaseApiRequests/v1/models"
 )
 
-func insertFiatMetadataInDb(conn *sqlx.DB, data models.FiatModel) error {
+func insertFiatMetadataInDb(conn *sqlx.DB, data models.FiatMeta) error {
 
 	query := "insert into fiat_info (name, sign, symbol) " +
 		"values (:name, :sign, :symbol);"

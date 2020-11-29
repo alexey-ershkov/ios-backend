@@ -10,8 +10,6 @@ import (
 )
 
 const (
-	mapQuery  = "/v1/cryptocurrency/map?sort=cmc_rank&limit=199"
-	protocol  = "https://"
 	apiEnvURL = "COINMARKET_URL"
 	apiEnvKey = "COINMARKET_API_KEY"
 	fiats     = "FIATS"
@@ -19,7 +17,8 @@ const (
 
 type CurrencyApi interface {
 	GetMetadata() ([]models.CurrencyMeta, error)
-	GetFiatMetadata() ([]models.FiatModel, error)
+	GetFiatMetadata() ([]models.FiatMeta, error)
+	GetCurrCurrencyInfo() ([]models.CurrCryptoInfo, error)
 }
 
 type CmcApi struct {
@@ -43,6 +42,7 @@ func NewCurrencyApi() (CurrencyApi, error) {
 	if !exists {
 		return nil, configs.NoEnvVarError
 	}
+	fiats = "USD," + fiats
 
 	return CmcApi{
 		BaseUrl: baseUrl,
@@ -52,7 +52,7 @@ func NewCurrencyApi() (CurrencyApi, error) {
 }
 
 func (cmc CmcApi) GetMetadata() ([]models.CurrencyMeta, error) {
-	rawMapReq, err := cmc.doRequest("/v1/cryptocurrency/map?sort=cmc_rank&limit=200")
+	rawMapReq, err := cmc.doRequest("/v1/cryptocurrency/map?sort=cmc_rank&limit=100")
 	if err != nil {
 		return nil, err
 	}
@@ -97,16 +97,16 @@ func (cmc CmcApi) GetMetadata() ([]models.CurrencyMeta, error) {
 	return metaData, nil
 }
 
-func (cmc CmcApi) GetFiatMetadata() ([]models.FiatModel, error) {
+func (cmc CmcApi) GetFiatMetadata() ([]models.FiatMeta, error) {
 	rawFiatMapReq, err := cmc.doRequest("/v1/fiat/map")
 	if err != nil {
 		return nil, err
 	}
 
-	fiatModels := make([]models.FiatModel, 0)
+	fiatModels := make([]models.FiatMeta, 0)
 
 	for _, fiat := range cmc.Fiats {
-		fiatModel := FindFiat(rawFiatMapReq.([]interface{}), fiat)
+		fiatModel := cmc.findFiat(rawFiatMapReq.([]interface{}), fiat)
 		if fiatModel == nil {
 			return nil, configs.NoSuchFiat
 		}
@@ -114,6 +114,55 @@ func (cmc CmcApi) GetFiatMetadata() ([]models.FiatModel, error) {
 	}
 
 	return fiatModels, nil
+}
+
+func (cmc CmcApi) GetCurrCurrencyInfo() ([]models.CurrCryptoInfo, error) {
+	currCryptoModels := make([]models.CurrCryptoInfo, 0)
+
+	for fiatIdx, fiat := range cmc.Fiats {
+		rawCurrCryptoReq, err := cmc.doRequest("/v1/cryptocurrency/listings/" +
+			"latest?limit=100&convert=" + fiat)
+		if err != nil {
+			return nil, err
+		}
+
+		for idx, element := range rawCurrCryptoReq.([]interface{}) {
+			if fiatIdx == 0 {
+				parsedElem := cmc.parseCurrCrypto(element)
+				if parsedElem == nil {
+					return nil, configs.CurrUpdParseError
+				}
+				currCryptoModels = append(currCryptoModels, *parsedElem)
+			} else {
+				err := cmc.upendFiat(&currCryptoModels[idx], element.(map[string]interface{}), fiat)
+				if err != nil {
+					return nil, err
+				}
+			}
+		}
+
+	}
+
+	return currCryptoModels, nil
+}
+
+func (cmc CmcApi) upendFiat(info *models.CurrCryptoInfo, raw map[string]interface{}, fiat string) error {
+	fiatModel := &models.Fiat{}
+	quote := raw["quote"].(map[string]interface{})[fiat]
+
+	jsonElement, err := json.Marshal(quote)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(jsonElement, fiatModel)
+	if err != nil {
+		return err
+	}
+	fiatModel.Symbol = fiat
+	fiatModel.CmcId = info.CmcId
+	info.CostInFiats = append(info.CostInFiats, *fiatModel)
+
+	return nil
 }
 
 func (cmc CmcApi) doRequest(query string) (interface{}, error) {
@@ -142,8 +191,8 @@ func (cmc CmcApi) doRequest(query string) (interface{}, error) {
 	return data, nil
 }
 
-func FindFiat(slice []interface{}, val string) *models.FiatModel {
-	out := &models.FiatModel{}
+func (cmc CmcApi) findFiat(slice []interface{}, val string) *models.FiatMeta {
+	out := &models.FiatMeta{}
 
 	for _, item := range slice {
 		jsonElement, err := json.Marshal(item)
@@ -159,4 +208,37 @@ func FindFiat(slice []interface{}, val string) *models.FiatModel {
 		}
 	}
 	return nil
+}
+
+func (cmc CmcApi) parseCurrCrypto(raw interface{}) *models.CurrCryptoInfo {
+	out := &models.CurrCryptoInfo{}
+	jsonElement, err := json.Marshal(raw)
+	if err != nil {
+		return nil
+	}
+	err = json.Unmarshal(jsonElement, out)
+	if err != nil {
+		return nil
+	}
+
+	usdQuote := raw.(map[string]interface{})["quote"].(map[string]interface{})["USD"]
+
+	out.PercentChange1h = usdQuote.(map[string]interface{})["percent_change_1h"].(float64)
+	out.PercentChange24h = usdQuote.(map[string]interface{})["percent_change_24h"].(float64)
+	out.PercentChange7d = usdQuote.(map[string]interface{})["percent_change_7d"].(float64)
+
+	fiatModel := &models.Fiat{}
+	jsonElement, err = json.Marshal(usdQuote)
+	if err != nil {
+		return nil
+	}
+	err = json.Unmarshal(jsonElement, fiatModel)
+	if err != nil {
+		return nil
+	}
+	fiatModel.Symbol = "USD"
+	fiatModel.CmcId = out.CmcId
+	out.CostInFiats = append(out.CostInFiats, *fiatModel)
+
+	return out
 }

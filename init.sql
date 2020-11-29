@@ -61,9 +61,6 @@ create table curr_crypto_info_in_fiat
     cmc_id       integer          not null
         constraint curr_crypto_info_in_fiat_curr_crypto_info_cmc_id_fk
             references curr_crypto_info
-            on update cascade on delete cascade
-        constraint curr_crypto_info_in_fiat_currency_info_cmc_id_fk
-            references currency_info
             on update cascade on delete cascade,
     price        double precision not null,
     volume       double precision,

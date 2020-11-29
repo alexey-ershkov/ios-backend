@@ -17,5 +17,4 @@
 .idea/
 
 go.sum
-
-cmd/.env
+.env

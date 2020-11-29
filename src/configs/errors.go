@@ -12,4 +12,5 @@ var (
 	ErrUserIdIsNotNumber   = errors.New("user id is not number")  // in get curr user
 	NoEnvVarError          = errors.New("there is no var in env")
 	NoSuchFiat             = errors.New("no fiat found")
+	CurrUpdParseError      = errors.New("can't parse curr currency data")
 )
