@@ -14,15 +14,18 @@ const (
 	protocol  = "https://"
 	apiEnvURL = "COINMARKET_URL"
 	apiEnvKey = "COINMARKET_API_KEY"
+	fiats     = "FIATS"
 )
 
 type CurrencyApi interface {
 	GetMetadata() ([]models.CurrencyMeta, error)
+	GetFiatMetadata() ([]models.FiatModel, error)
 }
 
 type CmcApi struct {
 	BaseUrl string
 	ApiKey  string
+	Fiats   []string
 }
 
 func NewCurrencyApi() (CurrencyApi, error) {
@@ -35,9 +38,16 @@ func NewCurrencyApi() (CurrencyApi, error) {
 	if !exists {
 		return nil, configs.NoEnvVarError
 	}
+
+	fiats, exists := os.LookupEnv(fiats)
+	if !exists {
+		return nil, configs.NoEnvVarError
+	}
+
 	return CmcApi{
 		BaseUrl: baseUrl,
 		ApiKey:  key,
+		Fiats:   strings.Split(fiats, ","),
 	}, nil
 }
 
@@ -66,7 +76,7 @@ func (cmc CmcApi) GetMetadata() ([]models.CurrencyMeta, error) {
 
 	symbols = strings.TrimSuffix(symbols, ",")
 
-	rawInfoReq, err := cmc.doRequest("/v1/cryptocurrency/info?symbol="+symbols)
+	rawInfoReq, err := cmc.doRequest("/v1/cryptocurrency/info?symbol=" + symbols)
 	if err != nil {
 		return nil, err
 	}
@@ -85,6 +95,25 @@ func (cmc CmcApi) GetMetadata() ([]models.CurrencyMeta, error) {
 	}
 
 	return metaData, nil
+}
+
+func (cmc CmcApi) GetFiatMetadata() ([]models.FiatModel, error) {
+	rawFiatMapReq, err := cmc.doRequest("/v1/fiat/map")
+	if err != nil {
+		return nil, err
+	}
+
+	fiatModels := make([]models.FiatModel, 0)
+
+	for _, fiat := range cmc.Fiats {
+		fiatModel := FindFiat(rawFiatMapReq.([]interface{}), fiat)
+		if fiatModel == nil {
+			return nil, configs.NoSuchFiat
+		}
+		fiatModels = append(fiatModels, *fiatModel)
+	}
+
+	return fiatModels, nil
 }
 
 func (cmc CmcApi) doRequest(query string) (interface{}, error) {
@@ -111,4 +140,23 @@ func (cmc CmcApi) doRequest(query string) (interface{}, error) {
 
 	data = data.(map[string]interface{})["data"]
 	return data, nil
+}
+
+func FindFiat(slice []interface{}, val string) *models.FiatModel {
+	out := &models.FiatModel{}
+
+	for _, item := range slice {
+		jsonElement, err := json.Marshal(item)
+		if err != nil {
+			return nil
+		}
+		err = json.Unmarshal(jsonElement, out)
+		if err != nil {
+			return nil
+		}
+		if out.Symbol == val {
+			return out
+		}
+	}
+	return nil
 }

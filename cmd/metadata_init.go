@@ -42,4 +42,9 @@ func main() {
 	if err != nil {
 		log.Error().Msgf(err.Error())
 	}
+
+	err = cmc.GetFiatMetadata(conn)
+	if err != nil {
+		log.Error().Msgf(err.Error())
+	}
 }

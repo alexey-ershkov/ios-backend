@@ -29,14 +29,54 @@ create table if not exists currency_info
     source_code citext collate "C"
 );
 
-create table if not exists crypto_cost_in_usd
+create table fiat_info
 (
-    id           bigserial primary key,
-    curr_info_fk bigint                    not null
-        constraint currency_info_fk
+    cmc_fiat_id integer not null
+        constraint fiat_info_pk
+            primary key,
+    name        citext  not null,
+    sign        citext  not null,
+    symbol      citext  not null
+);
+
+create table curr_crypto_info
+(
+    cmc_id             integer          not null
+        constraint current_crypto_info_pk
+            primary key,
+    max                double precision,
+    in_market          double precision,
+    mined              double precision,
+    last_updated       citext           not null,
+    percent_change_1h  double precision not null,
+    percent_change_24h double precision not null,
+    percent_change_7d  double precision not null
+);
+
+create table curr_crypto_info_in_fiat
+(
+    fiat_id      integer          not null
+        constraint curr_crypto_info_in_fiat_fiat_info_cmc_fiat_id_fk
+            references fiat_info
+            on update cascade on delete cascade,
+    cmc_id       integer          not null
+        constraint curr_crypto_info_in_fiat_curr_crypto_info_cmc_id_fk
+            references curr_crypto_info
+            on update cascade on delete cascade
+        constraint curr_crypto_info_in_fiat_currency_info_cmc_id_fk
             references currency_info
             on update cascade on delete cascade,
-    cost         double precision          not null,
-    date         date default CURRENT_DATE not null
+    price        double precision not null,
+    volume       double precision,
+    last_updated citext           not null,
+    constraint curr_crypto_info_in_fiat_pk
+        primary key (fiat_id, cmc_id)
 );
+
+
+
+
+
+
+
 
