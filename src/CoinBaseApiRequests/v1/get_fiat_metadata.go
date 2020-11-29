@@ -7,8 +7,8 @@ import (
 
 func insertFiatMetadataInDb(conn *sqlx.DB, data models.FiatModel) error {
 
-	query := "insert into fiat_info (cmc_fiat_id, name, sign, symbol) " +
-		"values (:cmc_fiat_id, :name, :sign, :symbol);"
+	query := "insert into fiat_info (name, sign, symbol) " +
+		"values (:name, :sign, :symbol);"
 
 	_, err := conn.NamedExec(query, data)
 	if err != nil {

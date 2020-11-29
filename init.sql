@@ -31,12 +31,11 @@ create table if not exists currency_info
 
 create table fiat_info
 (
-    cmc_fiat_id integer not null
+    symbol citext not null
         constraint fiat_info_pk
             primary key,
-    name        citext  not null,
-    sign        citext  not null,
-    symbol      citext  not null
+    sign   citext not null,
+    name   citext not null
 );
 
 create table curr_crypto_info
@@ -55,8 +54,8 @@ create table curr_crypto_info
 
 create table curr_crypto_info_in_fiat
 (
-    fiat_id      integer          not null
-        constraint curr_crypto_info_in_fiat_fiat_info_cmc_fiat_id_fk
+    fiat_symbol  citext           not null
+        constraint curr_crypto_info_in_fiat_fiat_info_symbol_fk
             references fiat_info
             on update cascade on delete cascade,
     cmc_id       integer          not null
@@ -70,7 +69,7 @@ create table curr_crypto_info_in_fiat
     volume       double precision,
     last_updated citext           not null,
     constraint curr_crypto_info_in_fiat_pk
-        primary key (fiat_id, cmc_id)
+        primary key (fiat_symbol, cmc_id)
 );
 
 
