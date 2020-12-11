@@ -5,6 +5,7 @@ import (
 	"ios-backend/src/currency_info"
 	"ios-backend/src/utills"
 	"net/http"
+	"strings"
 )
 
 type CurrencyHandler struct {
@@ -18,6 +19,7 @@ func NewUserHandler(r *mux.Router, UC currency_info.CurrUCase) {
 		UC: UC,
 	}
 	r.HandleFunc("/api/currency/get", handler.GetCurrency).Methods(http.MethodGet)
+	r.HandleFunc("/api/currency/list", handler.GetList).Methods(http.MethodGet)
 }
 
 func (ch CurrencyHandler) GetCurrency(w http.ResponseWriter, r *http.Request) {
@@ -29,6 +31,26 @@ func (ch CurrencyHandler) GetCurrency(w http.ResponseWriter, r *http.Request) {
 	name := args[0]
 
 	currInfo, err := ch.UC.GetCurrencyByName(name)
+	if err != nil {
+		utills.SendServerError(err.Error(), 500, w)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	utills.SendOKAnswer(currInfo, w)
+}
+
+func (ch CurrencyHandler) GetList(w http.ResponseWriter, r *http.Request) {
+	args, _ := r.URL.Query()["names"]
+
+	if args != nil {
+		args = strings.Split(args[0], ",")
+	} else {
+		args = nil
+	}
+
+
+	currInfo, err := ch.UC.GetCurrencyListByStockNames(args)
 	if err != nil {
 		utills.SendServerError(err.Error(), 500, w)
 		return

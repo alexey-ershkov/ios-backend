@@ -75,8 +75,8 @@ func main() {
 	currUC := currUCase.NewCurrUsecase(currR)
 	currDelivery.NewUserHandler(r, currUC)
 
-	updateCurr(conn)
-	go updateCurrEvery(configs.UPD_INTERVAL, conn)
+	//updateCurr(conn)
+	//go updateCurrEvery(configs.UPD_INTERVAL, conn)
 
 	//static server
 	r.PathPrefix(fmt.Sprintf("/%s/", configs.MEDIA_FOLDER)).Handler(
