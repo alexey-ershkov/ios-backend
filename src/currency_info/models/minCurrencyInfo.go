@@ -11,5 +11,5 @@ type MinCurrencyInfo struct {
 	PercentChange1h float64 `json:"percent_change_1h" db:"percent_change_1h"`
 	PercentChange24h float64 `json:"percent_change_24h" db:"percent_change_24h"`
 	PercentChange7d float64 `json:"percent_change_7d" db:"percent_change_7d"`
-	Cost []Fiat
+	Cost []Fiat `json:"cost"`
 }
