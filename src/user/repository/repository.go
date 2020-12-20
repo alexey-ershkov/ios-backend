@@ -40,3 +40,14 @@ func (p PostgresUserRepository) GetByID(c context.Context, id int) (models.SafeU
 		Photo:    dbUser.Photo,
 	}, err
 }
+
+func (p PostgresUserRepository) GetByEmailAndPassword(ctx context.Context, email string, password string) (models.SafeUser, error) {
+	var dbUser models.SafeUser
+	query := `SELECT * from users where Email=$1 and password=$2`
+	err := p.conn.GetContext(ctx, &dbUser, query, email, password)
+	return models.SafeUser{
+		NickName: dbUser.NickName,
+		Email:    dbUser.Email,
+		Photo:    dbUser.Photo,
+	}, err
+}
