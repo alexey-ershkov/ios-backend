@@ -44,3 +44,13 @@ func (u UserUsecase) GetCurrent(c context.Context, id int) (models.SafeUser, err
 	}
 	return usr, err
 }
+
+func (u UserUsecase) GetUserByEmailAndPassword(c context.Context, email string, password string) (models.SafeUser, error) {
+	ctx, cancel := context.WithTimeout(c, u.contextTimeout)
+	defer cancel()
+	usr, err := u.userRepo.GetByEmailAndPassword(ctx, email, password)
+	if err != nil {
+		return models.SafeUser{}, configs.ErrUserIsNotRegistered
+	}
+	return usr, err
+}

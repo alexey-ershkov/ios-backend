@@ -9,4 +9,5 @@ import (
 type Repository interface {
 	Add(c context.Context, newUser models.User) (models.SafeUser, error)
 	GetByID(c context.Context, id int) (models.SafeUser, error)
+	GetByEmailAndPassword(ctx context.Context, email string, password string) (models.SafeUser, error)
 }

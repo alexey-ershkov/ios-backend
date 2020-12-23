@@ -23,6 +23,7 @@ func NewUserHandler(r *mux.Router, us user.Usecase) {
 	}
 	r.HandleFunc("/api/user/add", handler.AddUser).Methods(http.MethodPost)
 	r.HandleFunc("/api/user/get", handler.GetUser).Methods(http.MethodGet)
+	r.HandleFunc("/api/user/login", handler.LoginUser).Methods(http.MethodPost)
 }
 
 func (s *UserHandler) fetchUser(r *http.Request) (models.User, error) {
@@ -89,4 +90,32 @@ func (s *UserHandler) GetUser(writer http.ResponseWriter, request *http.Request)
 		return
 	}
 	utills.SendOKAnswer(usr, writer)
+}
+
+func (s *UserHandler) LoginUser(writer http.ResponseWriter, request *http.Request) {
+	email, password, err := fetchEmailAndPassword(request)
+	if err != nil {
+		utills.SendServerError(err.Error(), http.StatusUnauthorized, writer)
+		return
+	}
+	usr, _ := s.SUsecase.GetUserByEmailAndPassword(request.Context(), email, password)
+	tenYears := time.Now().Add(time.Hour * 24 * 30 * 100)
+	endlessCookie := &http.Cookie{
+		Name:       "user_id",
+		Value:      strconv.Itoa(usr.UserID),
+		Path:       "/",
+		RawExpires: "",
+		Expires:    tenYears,
+		HttpOnly:   true,
+	}
+	http.SetCookie(writer, endlessCookie)
+	utills.SendOKAnswer(usr, writer)
+}
+
+func fetchEmailAndPassword(r *http.Request) (string, string, error) {
+	err := r.ParseMultipartForm(32 << 20)
+	if err != nil {
+		return "", "", configs.ErrBadRequest
+	}
+	return r.FormValue("Email"), r.FormValue("Password"), nil
 }
