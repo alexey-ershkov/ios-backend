@@ -98,7 +98,11 @@ func (s *UserHandler) LoginUser(writer http.ResponseWriter, request *http.Reques
 		utills.SendServerError(err.Error(), http.StatusUnauthorized, writer)
 		return
 	}
-	usr, _ := s.SUsecase.GetUserByEmailAndPassword(request.Context(), email, password)
+	usr, err := s.SUsecase.GetUserByEmailAndPassword(request.Context(), email, password)
+	if err != nil {
+		utills.SendServerError(err.Error(), http.StatusUnauthorized, writer)
+		return
+	}
 	tenYears := time.Now().Add(time.Hour * 24 * 30 * 100)
 	endlessCookie := &http.Cookie{
 		Name:       "user_id",
