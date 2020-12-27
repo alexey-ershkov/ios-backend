@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -38,16 +39,19 @@ func (p PostgresUserRepository) GetByID(c context.Context, id int) (models.SafeU
 		NickName: dbUser.NickName,
 		Email:    dbUser.Email,
 		Photo:    dbUser.Photo,
+		UserID:   dbUser.UserID,
 	}, err
 }
 
 func (p PostgresUserRepository) GetByEmailAndPassword(ctx context.Context, email string, password string) (models.SafeUser, error) {
-	var dbUser models.SafeUser
+	var dbUser models.User
 	query := `SELECT * from users where Email=$1 and password=$2`
 	err := p.conn.GetContext(ctx, &dbUser, query, email, password)
+	fmt.Println(dbUser, err)
 	return models.SafeUser{
 		NickName: dbUser.NickName,
 		Email:    dbUser.Email,
 		Photo:    dbUser.Photo,
+		UserID:   dbUser.UserID,
 	}, err
 }
